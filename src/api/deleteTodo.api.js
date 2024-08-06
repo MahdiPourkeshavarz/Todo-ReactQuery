@@ -9,6 +9,6 @@ export async function deleteTodo(todo) {
   } else {
     url = "/todos"
   }
-  const response = await httpRequest.delete(url, todo.id);
+  const response = await httpRequest.delete(`${url}/${todo.id}`);
   return response.statusText;
 }
