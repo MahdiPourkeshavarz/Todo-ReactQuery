@@ -93,12 +93,12 @@ export function TodoProvider({ children }) {
       value={{
         todos,
         doneTodos,
+        editValues,
         onDelete,
         onEdit,
         onDone,
         onIsNotDone,
-        onSubmit,
-        editValues
+        onSubmit
       }}
     >
       {children}
