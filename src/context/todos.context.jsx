@@ -22,6 +22,7 @@ export function TodoProvider({ children }) {
 
   const [todos, setTodos] = useState(unDoneTodos);
   const [doneTodos, setDoneTodos] = useState(isDoneTodos);
+  const [editValues, setEditValues] = useState({});
 
   const addMutation = useMutation({
     mutationFn: (todo) => submitTodo(todo),
@@ -66,7 +67,7 @@ export function TodoProvider({ children }) {
   }
 
   function onEdit(todo) {
-    editMutation.mutate(todo);
+    setEditValues(todo)
   }
 
   function onDone(todo) {
@@ -79,7 +80,11 @@ export function TodoProvider({ children }) {
     deleteMutation.mutate(todo)
   }
   function onSubmit(todo) {
-    addMutation.mutate({...todo, id: `${crypto.randomUUID()}`})
+    if (todo.id) {
+      editMutation.mutate(todo);
+    } else {
+      addMutation.mutate({ ...todo, id: `${crypto.randomUUID()}` })
+    }
   }
 
 
@@ -93,6 +98,7 @@ export function TodoProvider({ children }) {
         onDone,
         onIsNotDone,
         onSubmit,
+        editValues
       }}
     >
       {children}
