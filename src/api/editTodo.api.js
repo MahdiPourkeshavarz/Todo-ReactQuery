@@ -8,6 +8,6 @@ export async function editTodo(todo) {
   } else {
     url = "/todos"
   }
-  const response = await httpRequest.put(url, todo);
+  const response = await httpRequest.patch(`${url}/${todo.id}`, todo);
   return response.statusText;
 }

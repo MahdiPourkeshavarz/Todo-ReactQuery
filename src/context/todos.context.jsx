@@ -4,8 +4,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { submitTodo } from "../api/setTodo.api";
 import { deleteTodo } from "../api/deleteTodo.api";
 import { editTodo } from "../api/editTodo.api";
-import { useGeTodos } from "../hooks/useGetTodos";
-import { useGetDoneTodos } from "../hooks/useGetDoneTodos";
+import { useGetTodos } from "../hooks/useGetTodos";
+
 
 const todosContext = createContext();
 
@@ -13,53 +13,48 @@ export function TodoProvider({ children }) {
 
   const queryClient = useQueryClient()
   const {
-    data: unDoneTodos,
-  } = useGeTodos()
+    data: { todos: unDoneTodos, doneTodos: isDoneTodos },
+    refetch
+  } = useGetTodos()
 
-  const {
-    data: isDoneTodos,
-  } = useGetDoneTodos();
 
-  const [todos, setTodos] = useState(unDoneTodos);
-  const [doneTodos, setDoneTodos] = useState(isDoneTodos);
-  const [editValues, setEditValues] = useState({});
+  const [todos, setTodos] = useState(unDoneTodos || []);
+  const [doneTodos, setDoneTodos] = useState(isDoneTodos || []);
+  const [editValues, setEditValues] = useState({
+    title: "",
+    isDone: false
+  });
+  const [currentTodo, setCurrentTodo] = useState({})
 
   const addMutation = useMutation({
     mutationFn: (todo) => submitTodo(todo),
     onSuccess: () => {
-      let command = "todos"
-      if (todos.isDone === true) {
-        command = "doneTodos"
-      }
-      queryClient.invalidateQueries({ queryKey: command })
+      queryClient.invalidateQueries({ queryKey: currentTodo.isDone ? "doneTodos" : "todos" })
+      refetch()
     }
   })
 
   const deleteMutation = useMutation({
     mutationFn: (todo) => deleteTodo(todo),
     onSuccess: () => {
-      let command = "todos"
-      if (todos.isDone === true) {
-        command = "doneTodos"
-      }
-      queryClient.invalidateQueries({ queryKey: command })
+      queryClient.invalidateQueries({ queryKey: currentTodo.isDone ? "doneTodos" : "todos" })
+      refetch()
     }
   })
 
   const editMutation = useMutation({
     mutationFn: (todo) => editTodo(todo),
     onSuccess: () => {
-      let command = "todos"
-      if (todos.isDone === true) {
-        command = "doneTodos"
-      }
-      queryClient.invalidateQueries({ queryKey: command })
+      queryClient.invalidateQueries({ queryKey: currentTodo.isDone ? "doneTodos" : "todos" })
+      refetch()
     }
   })
 
   useEffect(() => {
     setDoneTodos(isDoneTodos)
     setTodos(unDoneTodos)
+    console.log(unDoneTodos);
+    console.log(isDoneTodos);
   }, [unDoneTodos, isDoneTodos])
 
   function onDelete(todo) {
@@ -80,11 +75,32 @@ export function TodoProvider({ children }) {
     deleteMutation.mutate(todo)
   }
   function onSubmit(todo) {
-    if (todo.id) {
-      editMutation.mutate(todo);
+    if (editValues.id) {
+      editMutation.mutate(
+        { ...editValues, ...todo },
+        {
+          onSuccess: () => {
+            // Invalidate and refetch the todos list
+            queryClient.invalidateQueries("todos");
+            queryClient.invalidateQueries("doneTodos");
+          },
+        }
+      );
+      setEditValues({
+        title: "",
+        isDone: false
+      })
     } else {
-      addMutation.mutate({ ...todo, id: `${crypto.randomUUID()}` })
+      addMutation.mutate({ ...todo, id: `${crypto.randomUUID()}` });
+      setEditValues({
+        title: "",
+        isDone: false
+      })
     }
+  }
+
+  function todoInAction(todo) {
+    setCurrentTodo(todo)
   }
 
 
@@ -98,7 +114,8 @@ export function TodoProvider({ children }) {
         onEdit,
         onDone,
         onIsNotDone,
-        onSubmit
+        onSubmit,
+        todoInAction
       }}
     >
       {children}

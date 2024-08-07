@@ -7,8 +7,8 @@ export function Home() {
   const { editValues } = useTodoContext()
   return (
     <>
-      <h2>Todo app</h2>
-      <TodosForm editValues={editValues}/>
+      <p className="flex justify-center pt-4 text-2xl">Todo app</p>
+      <TodosForm values={editValues}/>
       <TodosList />
     </>
   )

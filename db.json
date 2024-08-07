@@ -6,22 +6,21 @@
       "isDone": false
     },
     {
-      "id": "3",
-      "title": "washing dishes",
+      "id": "2",
+      "title": "watching tv",
       "isDone": false
     }
   ],
   "doneTodos": [
     {
       "id": "4",
-      "title": "buying laptop",
+      "title": "buying laptop2",
       "isDone": true
     },
     {
-      "id": "2",
-      "title": "watching tv",
+      "id": "a04b4df4-204f-475c-80e0-42ea82855c15",
+      "title": "buying shoes2",
       "isDone": true
     }
   ]
-
 }
